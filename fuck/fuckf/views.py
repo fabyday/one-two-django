@@ -3,7 +3,10 @@ from rest_framework import viewsets
 from rest_framework import permissions
 from .serializer import BoardSerializer
 from fuckf.serializer import UserSerializer, GroupSerializer
+from fuckf.serializer import *
+
 from fuckf.models import *
+from rest_framework import generics
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -12,6 +15,34 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (permissions.AllowAny,)
+    serializer_class = RegisterSerializer
+
+
+
+
+class CreatePost(generics.ListCreateAPIView):
+    qeuryset = Board.objects.all()
+    serializer_class = BoardSerializer
+    
+
+class PostDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Board.objects.all()
+    serializer_class = BoardSerializer
+
+
 
 
 class GroupViewSet(viewsets.ModelViewSet):
@@ -25,29 +56,11 @@ class GroupViewSet(viewsets.ModelViewSet):
 
 
 
-class BoardViewSet(viewsets.ModelViewSet):
+class BoardCreateViewSet(generics.ListCreateAPIView):
     queryset = Board.objects.all()
     serializer_class = BoardSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
-
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
-@csrf_exempt
-def snippet_list(request):
-    """
-    List all code snippets, or create a new snippet.
-    """
-    if request.method == 'GET':
-        snippets = User.objects.all()
-        serializer = UserSerializer(snippets, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = UserSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
+class BoardViewSet(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Board.objects.all()
+    serializer_class = BoardSerializer
