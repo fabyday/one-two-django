@@ -11,7 +11,6 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 
-
 ##
 ## AUTHENTICATION
 ##
@@ -23,7 +22,6 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [TokenAuthentication]
-
 
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
@@ -52,13 +50,10 @@ class LoginView(generics.GenericAPIView):
         return Response(None, status=status.HTTP_401_UNAUTHORIZED)
 
 from rest_framework.authtoken.serializers import AuthTokenSerializer
+
 class TokenList(generics.ListAPIView):
     queryset = Token.objects.all() 
     serializer_class = AuthTokenSerializer 
-
-
-
-
 
 #####
 # POST
@@ -70,31 +65,25 @@ class PostList(generics.ListAPIView):
     permission_classes = (permissions.AllowAny,)
 
 class CreatePost(generics.CreateAPIView):
-
     queryset = Post.objects.all()
     serializer_class = PostCreateSerializer
     permission_classes = (permissions.IsAuthenticated,)
     authentication_classes = [TokenAuthentication]
-    
-   
+
     def post(self, request, *args, **kwargs):
+        print("test req", request.data)
+        print("test req", request.user)
         serializer = PostCreateSerializer(data= request.data)
         if serializer.is_valid():
-            post = Post.objects.create(title = request.data['title'], author = request.data['author'], contents = request.data['contents'])
-            return response(serializer.data, status = status.HTTP_200_OK)
-        return response(serializer.data, status = status.HTTP_400_BAD_REQUEST)
-
-
+            post = Post.objects.create(title = request.data['title'], author = request.user, contents = request.data['contents'])
+            return Response(serializer.data, status = status.HTTP_200_OK)
+        return Response(serializer.data, status = status.HTTP_400_BAD_REQUEST)
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     authentication_classes = [TokenAuthentication]
-
-
-
-
 
 class GroupViewSet(viewsets.ModelViewSet):
     """

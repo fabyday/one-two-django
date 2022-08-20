@@ -99,6 +99,10 @@ class PostCreateSerializer(serializers.ModelSerializer):
         model = Post 
         fields = ("title", "contents", "author")
 
+    def create(self, validated_data):
+        print("val data :", validated_data)
+        return Post.objects.create(**validated_data)
+
 
 
 
