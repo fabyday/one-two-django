@@ -44,10 +44,13 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class UserSerializer(serializers.ModelSerializer):
-    # board = serializers.PrimaryKeyRelatedField(many=True, queryset=Board.objects.all()) #reverse relationship
+    # Post = serializers.PrimaryKeyRelatedField(many=True, queryset=Post.objects.all()) #reverse relationship
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'groups']#, 'board']
+        fields = ['id', 'username', 'email', 'groups']#, 'Post']
+
+
+
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
@@ -56,19 +59,17 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['url', 'name']
 
 
-class BoardSerializer(serializers.ModelSerializer):
+class PostSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=False, allow_blank=True, max_length=100)
     contents = serializers.CharField(style={'base_template': 'textarea.html'})
-    # author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    author = serializers.CharField()
-    # author = serializers.PrimaryKeyRelatedField()
+    author = serializers.ReadOnlyField(source="user.username")
     
     created_at = serializers.DateTimeField()
     recently_modified_at = serializers.DateTimeField()
     visited_at = serializers.DateTimeField()
 
     class Meta:
-        model = Board
+        model = Post
         fields = ("title", "contents", "author", "created_at", "recently_modified_at", "visited_at")
  
 
@@ -76,7 +77,7 @@ class BoardSerializer(serializers.ModelSerializer):
         """
         Create and return a new `Snippet` instance, given the validated data.
         """
-        return Board.objects.create(**validated_data)
+        return Post.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         """
@@ -90,5 +91,16 @@ class BoardSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-    
+
+class PostCreateSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source="user.username")
+
+    class Meta:
+        model = Post 
+        fields = ("title", "contents", "author")
+
+
+
+
+
     
