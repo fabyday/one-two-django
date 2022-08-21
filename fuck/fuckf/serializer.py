@@ -104,6 +104,22 @@ class PostCreateSerializer(serializers.ModelSerializer):
         return Post.objects.create(**validated_data)
 
 
+class PostDetailSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source="user.username")
+
+    class Meta:
+        model = Post 
+        fields = ['title', 'contents', 'author', 'recently_modified_at']
+
+    def update(self, instance, validated_data):
+        pass
+
+    def save(self, **kwargs):
+        pass
+
+    
+
+
 
 
 

@@ -49,11 +49,11 @@ class LoginView(generics.GenericAPIView):
             return Response({'token' : token.key})
         return Response(None, status=status.HTTP_401_UNAUTHORIZED)
 
-from rest_framework.authtoken.serializers import AuthTokenSerializer
+# from rest_framework.authtoken.serializers import AuthTokenSerializer
 
-class TokenList(generics.ListAPIView):
-    queryset = Token.objects.all() 
-    serializer_class = AuthTokenSerializer 
+# class TokenList(generics.ListAPIView):
+#     queryset = Token.objects.all() 
+#     serializer_class = AuthTokenSerializer 
 
 #####
 # POST
@@ -71,8 +71,6 @@ class CreatePost(generics.CreateAPIView):
     authentication_classes = [TokenAuthentication]
 
     def post(self, request, *args, **kwargs):
-        print("test req", request.data)
-        print("test req", request.user)
         serializer = PostCreateSerializer(data= request.data)
         if serializer.is_valid():
             post = Post.objects.create(title = request.data['title'], author = request.user, contents = request.data['contents'])
@@ -81,9 +79,40 @@ class CreatePost(generics.CreateAPIView):
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
-    serializer_class = PostSerializer
+    serializer_class = PostDetailSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     authentication_classes = [TokenAuthentication]
+
+
+    def get(self, request, *args, **kwargs):
+        """
+            GET
+        """
+        return self.retrieve(request, *args, **kwargs)
+        serializer = PostDetail.serializer_class(data = request.data)
+        if serializer.is_valid():
+            post = Post.objects.get()
+            return Response(None, status.HTTP_200_OK)
+        return Response(None, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, *args, **kwargs):
+        """
+
+        """
+        return self.update(request, *args, **kwargs)
+
+        
+    
+    def patch(self, request, *args, **kwargs):
+        """
+            UPDATE
+        """
+        pass
+    
+    def delete(self, request, *args, **kwargs):
+        
+        pass
+    
 
 class GroupViewSet(viewsets.ModelViewSet):
     """

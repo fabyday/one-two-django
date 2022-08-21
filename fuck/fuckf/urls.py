@@ -18,16 +18,10 @@ urlpatterns = [
         path('post/create', views.CreatePost.as_view()),
         path('post/list', views.PostList.as_view()),
         path('post/<int:pk>', views.PostDetail.as_view()),
-
-
-
+        
 
         # for debugging 
-
-        
-        path('talk', views.TokenList.as_view()),
-
-
+        # path('talk', views.TokenList.as_view()),
     ]
 
 
