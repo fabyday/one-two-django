@@ -14,12 +14,20 @@ urlpatterns = [
         path('get-token', views.LoginView.as_view()),
         
         
-        # Post CRUD 
+        # Post create list
         path('post/create', views.CreatePost.as_view()),
         path('post/list', views.PostList.as_view()),
-        path('post/<int:pk>', views.PostDetail.as_view()),
-        
 
+
+        # post delete get put update
+        path('post/<str:test>/<int:pk>', views.PostDetail.as_view()),
+        
+        
+        
+        
+        path('post-category/<int:pk>/post-list', views.PostCategoryList.as_view()),
+        path('post-category/list', views.PostCategoryList.as_view()),
+        path('post-category/create', views.PostCategoryCreate.as_view()),
         # for debugging 
         # path('talk', views.TokenList.as_view()),
     ]

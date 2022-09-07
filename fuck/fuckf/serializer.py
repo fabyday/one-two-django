@@ -1,9 +1,13 @@
+from time import timezone
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 from fuckf.models import *
 from rest_framework.validators import UniqueValidator
 
 from django.contrib.auth.password_validation import validate_password
+
+from  django.utils import timezone
+
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -123,4 +127,38 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
 
 
+
+
+
+
+class PostCategorySerializer(serializers.ModelSerializer):
+    parent_category = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    name = serializers.CharField(required=False, allow_blank=True, max_length=100)
     
+    class Meta:
+        model = PostCategory
+        fields = ("parent_category", "name")
+    
+
+
+    def update(self, instance, validated_data):
+        """
+        Update and return an existing `Snippet` instance, given the validated data.
+        """
+        instance.name = validated_data.get('name', instance.title)
+        instance.parent_category = validated_data.get('parent_category', instance.contents)
+        instance.recently_modified_at = serializers.DateTimeField()
+        instance.save()
+        return instance
+
+
+class PostCategoryCreateSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source="user.username")
+
+    class Meta:
+        model = PostCategory 
+        fields = ("parent_category", "name")
+
+    def create(self, validated_data):
+        print("val data :", validated_data)
+        return Post.objects.create(**validated_data)

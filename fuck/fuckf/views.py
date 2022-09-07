@@ -2,7 +2,7 @@ from telnetlib import STATUS
 from django.contrib.auth.models import User, Group
 from rest_framework import permissions, response, status, viewsets
 from .serializer import PostSerializer
-from fuckf.serializer import UserSerializer, GroupSerializer
+from fuckf.serializer import UserSerializer
 from fuckf.serializer import *
 from rest_framework.authtoken.models import Token 
 from fuckf.models import *
@@ -10,6 +10,24 @@ from django.contrib.auth import authenticate
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
+
+
+class CategoryVisiblePermssion(permissions.BasePermission):
+    """Allow users to update their own manuscripts libraries."""
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.manuscript.author == request.user
+
+    def has_permission(self, request, view):
+        authenticator = request._authenticator
+
+        if request.method == 'POST':
+            return True
+        
+        if request.method == "GET":
+            return True
+        
 
 ##
 ## AUTHENTICATION
@@ -88,6 +106,9 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
         """
             GET
         """
+        print("resr", request)
+        print("resr", args)
+        print("resr", kwargs)
         return self.retrieve(request, *args, **kwargs)
         serializer = PostDetail.serializer_class(data = request.data)
         if serializer.is_valid():
@@ -104,22 +125,48 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
         
     
     def patch(self, request, *args, **kwargs):
-        """
-            UPDATE
-        """
-        pass
-    
+        return self.partial_update(request, *args, **kwargs)
+
     def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+
+
+class PostCategoryList(generics.ListAPIView):
+    queryset = PostCategory.objects.all()
+    serializer_class = PostCategorySerializer
+    permission_classes = (permissions.AllowAny,)
+
+class PostCategoryCreate(generics.CreateAPIView):
+    queryset = PostCategory.objects.all()
+    serializer_class = PostCategoryCreateSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    authentication_classes = [TokenAuthentication]
+
+    def post(self, request, *args, **kwargs):
+        serializer = PostCategoryCreateSerializer(data= request.data)
+        if serializer.is_valid():
+            post = Post.objects.create(title = request.data['title'], author = request.user, contents = request.data['contents'])
+            return Response(serializer.data, status = status.HTTP_200_OK)
+        return Response(serializer.data, status = status.HTTP_400_BAD_REQUEST)
+
+class PostCategoryRetriveUpdateDestroy(generics.DestroyAPIView, generics.UpdateAPIView):
+    queryset = PostCategory.objects.all()
+    serializer_class = PostCategorySerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    authentication_classes = [TokenAuthentication]
+
+
+    def put(self, request, *args, **kwargs):
+        """
+
+        """
+        return self.update(request, *args, **kwargs)
+
         
-        pass
     
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
 
-class GroupViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = [Token]
-
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)

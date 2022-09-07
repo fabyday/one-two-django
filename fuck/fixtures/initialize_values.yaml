@@ -1,0 +1,5 @@
+- model: fuckf.PostCategory
+  pk: 0
+  fields:
+    parent_category: null
+    name : default
