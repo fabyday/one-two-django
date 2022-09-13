@@ -1,3 +1,4 @@
+from pickle import FALSE
 from unicodedata import category
 from django.db import models
 
@@ -24,14 +25,17 @@ class Post(models.Model):
 
 
 class PostCategory(models.Model):
-    parent_category = models.CharField(max_length=256, verbose_name="super_category")
+    parent_category = models.CharField(max_length=256, verbose_name="super_category",default='null', null=True)
     name = models.CharField(max_length=256, verbose_name="category_name")
     created_at = models.DateTimeField(auto_now=True, verbose_name='created_at')
     recently_modified_at = models.DateTimeField(auto_now_add=True, verbose_name='created_at')
-    accessable_group = models.ForeignKey(Group, related_name="post_category", on_delete=models.DO_NOTHING, verbose_name="category")
+    # is_private = models.ForeignKey(Group, related_name="post_category", on_delete=models.DO_NOTHING, verbose_name="category")
+    is_private = models.BooleanField(False)
 
     class Meta:
         db_table="PostCategory"
         verbose_name="PostCategory"
+        unique_together = (("parent_category", "name"),) # primary key is (parent_category, name)
+
 
     

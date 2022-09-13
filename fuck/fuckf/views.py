@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
-
+from .custom_permission import *
 
 class CategoryVisiblePermssion(permissions.BasePermission):
     """Allow users to update their own manuscripts libraries."""
@@ -89,9 +89,12 @@ class CreatePost(generics.CreateAPIView):
     authentication_classes = [TokenAuthentication]
 
     def post(self, request, *args, **kwargs):
-        serializer = PostCreateSerializer(data= request.data)
+        serializer = PostCreateSerializer(data = request.data)
+        print("gogo")
         if serializer.is_valid():
-            post = Post.objects.create(title = request.data['title'], author = request.user, contents = request.data['contents'])
+            print("valid")
+            serializer.create(request.data)
+            # post = Post.objects.create(title = request.data['title'], author = request.user, contents = request.data['contents'])
             return Response(serializer.data, status = status.HTTP_200_OK)
         return Response(serializer.data, status = status.HTTP_400_BAD_REQUEST)
 
@@ -135,18 +138,39 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
 class PostCategoryList(generics.ListAPIView):
     queryset = PostCategory.objects.all()
     serializer_class = PostCategorySerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (IsOwnerOrConditionalReadOnly,)
+    authentication_classes = [TokenAuthentication]
+
+    def get_queryset(self):
+        """
+        This view should return a list of all the purchases
+        for the currently authenticated user.
+        """
+        user = self.request.user
+        perm = IsOwner()
+        if perm.has_permission(request=self.request, view= None ):
+            return super(PostCategoryList, self).get_queryset()
+        else:
+            return PostCategory.objects.filter(is_private=False)
+
+
 
 class PostCategoryCreate(generics.CreateAPIView):
     queryset = PostCategory.objects.all()
     serializer_class = PostCategoryCreateSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated, )
     authentication_classes = [TokenAuthentication]
 
     def post(self, request, *args, **kwargs):
+        print('res', request.data)
+
         serializer = PostCategoryCreateSerializer(data= request.data)
+        print(serializer.is_valid())
         if serializer.is_valid():
-            post = Post.objects.create(title = request.data['title'], author = request.user, contents = request.data['contents'])
+            # post_category = PostCategory.objects.create(name = request.data['name'],\
+            #                                             is_private=request.data['is_private'],\
+            #                                             parent_category = request.data.get('parent_category', 'null') )m
+            serializer.create(request.data)
             return Response(serializer.data, status = status.HTTP_200_OK)
         return Response(serializer.data, status = status.HTTP_400_BAD_REQUEST)
 

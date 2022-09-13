@@ -98,13 +98,13 @@ class PostSerializer(serializers.ModelSerializer):
 
 class PostCreateSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source="user.username")
-
+    # category = PostSerializer()
     class Meta:
         model = Post 
-        fields = ("title", "contents", "author")
+        fields = ("title", "contents", "author", "category")
 
     def create(self, validated_data):
-        print("val data :", validated_data)
+        print("val data :", self.validated_data)
         return Post.objects.create(**validated_data)
 
 
@@ -113,7 +113,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post 
-        fields = ['title', 'contents', 'author', 'recently_modified_at']
+        fields = ['title', 'contents', 'author']
 
     def update(self, instance, validated_data):
         pass
@@ -132,12 +132,12 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
 
 class PostCategorySerializer(serializers.ModelSerializer):
-    parent_category = serializers.CharField(required=False, allow_blank=True, max_length=100)
-    name = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    # parent_category = serializers.CharField(required=False, allow_blank=True, max_length=100)
+    # name = serializers.CharField(required=False, allow_blank=True, max_length=100)
     
     class Meta:
         model = PostCategory
-        fields = ("parent_category", "name")
+        fields = ("parent_category","name", "is_private")
     
 
 
@@ -153,12 +153,19 @@ class PostCategorySerializer(serializers.ModelSerializer):
 
 
 class PostCategoryCreateSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source="user.username")
-
+    name = serializers.CharField(max_length=256)
+    
     class Meta:
-        model = PostCategory 
-        fields = ("parent_category", "name")
+        model = PostCategory
+        fields = ("name", "is_private")
+    
+    def __init__(self, *args, **kwargs):
+        if kwargs['data'].get('parent_category'):
+            self.Meta.fields = list(self.Meta.fields)
+            self.Meta.fields.append('parent_category')
+        super(PostCategoryCreateSerializer, self).__init__(*args, **kwargs)
 
-    def create(self, validated_data):
-        print("val data :", validated_data)
-        return Post.objects.create(**validated_data)
+
+
+    def create(self, validated_data=None):
+        return PostCategory.objects.create(**self.validated_data)
