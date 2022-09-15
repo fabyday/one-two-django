@@ -9,7 +9,7 @@ from fuckf.models import *
 from django.contrib.auth import authenticate
 from rest_framework import generics
 from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import TokenAuthentication, BasicAuthentication
 from .custom_permission import *
 
 class CategoryVisiblePermssion(permissions.BasePermission):
@@ -81,20 +81,39 @@ class PostList(generics.ListAPIView):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = (permissions.AllowAny,)
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
+
+    def get_queryset(self, **kwargs):
+        """
+        This view should return a list of all the purchases
+        for the currently authenticated user.
+        """
+        user = self.request.user
+        perm = IsOwner()
+
+        if perm.has_permission(request=self.request, view= None ):
+            return super(PostList, self).get_queryset()
+        else:
+            return Post.objects.filter(category_id=kwargs['category'])
+
+
 
 class CreatePost(generics.CreateAPIView):
     queryset = Post.objects.all()
     serializer_class = PostCreateSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
 
     def post(self, request, *args, **kwargs):
-        serializer = PostCreateSerializer(data = request.data)
         print("gogo")
+        print(request.data, "test")
+        print(PostCategory.objects.get(id=1))
+        serializer = PostCreateSerializer(data = request.data)
         if serializer.is_valid():
             print("valid")
-            serializer.create(request.data)
-            # post = Post.objects.create(title = request.data['title'], author = request.user, contents = request.data['contents'])
+            # serializer.create(request.data)
+            # serializer.create()
+            post = Post.objects.create(title = request.data['title'], category=PostCategory.objects.get(id=request.data['category']),  author = request.user, contents = request.data['contents'])
             return Response(serializer.data, status = status.HTTP_200_OK)
         return Response(serializer.data, status = status.HTTP_400_BAD_REQUEST)
 
@@ -148,6 +167,7 @@ class PostCategoryList(generics.ListAPIView):
         """
         user = self.request.user
         perm = IsOwner()
+
         if perm.has_permission(request=self.request, view= None ):
             return super(PostCategoryList, self).get_queryset()
         else:
@@ -159,7 +179,7 @@ class PostCategoryCreate(generics.CreateAPIView):
     queryset = PostCategory.objects.all()
     serializer_class = PostCategoryCreateSerializer
     permission_classes = (permissions.IsAuthenticated, )
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
 
     def post(self, request, *args, **kwargs):
         print('res', request.data)
@@ -178,7 +198,7 @@ class PostCategoryRetriveUpdateDestroy(generics.DestroyAPIView, generics.UpdateA
     queryset = PostCategory.objects.all()
     serializer_class = PostCategorySerializer
     permission_classes = (permissions.IsAuthenticated,)
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [TokenAuthentication, ]
 
 
     def put(self, request, *args, **kwargs):

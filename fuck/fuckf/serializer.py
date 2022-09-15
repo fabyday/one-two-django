@@ -95,17 +95,20 @@ class PostSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-
+from .models import *
 class PostCreateSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source="user.username")
     # category = PostSerializer()
+
     class Meta:
         model = Post 
         fields = ("title", "contents", "author", "category")
 
-    def create(self, validated_data):
-        print("val data :", self.validated_data)
-        return Post.objects.create(**validated_data)
+    # def create(self, validated_data):
+        
+    #     print("val data :", self.validated_data)
+        
+    #     return Post.objects.create(**validated_data)
 
 
 class PostDetailSerializer(serializers.ModelSerializer):

@@ -25,7 +25,7 @@ urlpatterns = [
         
         
         # path(, views.PostList.as_view()),
-        path('post/<int:pk>/list', views.PostCategoryList.as_view()),
+        path('post/<int:category>/list', views.PostList.as_view()),
 
         path('post/category-list', views.PostCategoryList.as_view()),
         path('post/category/create', views.PostCategoryCreate.as_view()),
