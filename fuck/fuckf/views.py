@@ -206,8 +206,6 @@ class PostCategoryRetriveUpdateDestroy(generics.DestroyAPIView, generics.UpdateA
 
         """
         return self.update(request, *args, **kwargs)
-
-        
     
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
