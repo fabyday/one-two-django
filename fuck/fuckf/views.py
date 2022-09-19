@@ -121,16 +121,13 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     serializer_class = PostDetailSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
 
 
     def get(self, request, *args, **kwargs):
         """
             GET
         """
-        print("resr", request)
-        print("resr", args)
-        print("resr", kwargs)
         return self.retrieve(request, *args, **kwargs)
         serializer = PostDetail.serializer_class(data = request.data)
         if serializer.is_valid():

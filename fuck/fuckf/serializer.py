@@ -112,19 +112,20 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
 
 class PostDetailSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source="user.username")
+    author = serializers.SerializerMethodField()
 
     class Meta:
         model = Post 
-        fields = ['title', 'contents', 'author']
+        fields = ['title', 'contents', 'author','category', 'recently_modified_at', 'created_at']
 
-    def update(self, instance, validated_data):
-        pass
+    # def update(self, instance, validated_data):
+    #     pass
 
-    def save(self, **kwargs):
-        pass
+    # def save(self, **kwargs):
+    #     pass
 
-    
+    def get_author(self,obj):
+        return str(obj.author.username) 
 
 
 
