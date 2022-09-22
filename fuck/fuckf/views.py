@@ -96,6 +96,7 @@ class PostList(generics.ListAPIView):
         else:
             return Post.objects.filter(category_id=kwargs['category'])
 
+from rest_framework.parsers import *
 
 
 class CreatePost(generics.CreateAPIView):
@@ -103,19 +104,30 @@ class CreatePost(generics.CreateAPIView):
     serializer_class = PostCreateSerializer
     permission_classes = (permissions.IsAuthenticated,)
     authentication_classes = [TokenAuthentication, BasicAuthentication]
-
     def post(self, request, *args, **kwargs):
-        print("gogo")
-        print(request.data, "test")
-        print(PostCategory.objects.get(id=1))
+        request.data._mutable = True
+        request.data['author'] = str(request.user.id)
+        print(request.data)
+        l = []
+        for img in request.data.pop('images') :
+            # l.append({"image":img})
+            qq = QueryDict(mutable=True)
+            qq['image']=img
+            l.append(qq)
+            # request.data['images'].append(qq)
+        print(l)
+        # request.data['images']=l
+        request.data.setlist('images', l)
         serializer = PostCreateSerializer(data = request.data)
+        print('tt')
         if serializer.is_valid():
-            print("valid")
-            # serializer.create(request.data)
+            # post = serializer.create(request.data, request.user)
+            post = serializer.save()
             # serializer.create()
-            post = Post.objects.create(title = request.data['title'], category=PostCategory.objects.get(id=request.data['category']),  author = request.user, contents = request.data['contents'])
+            # post = Post.objects.create(title = request.data['title'], category=PostCategory.objects.get(id=request.data['category']),  author = request.user, contents = request.data['contents'])
             return Response(serializer.data, status = status.HTTP_200_OK)
-        return Response(serializer.data, status = status.HTTP_400_BAD_REQUEST)
+
+        return Response(status = status.HTTP_400_BAD_REQUEST)
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
@@ -135,15 +147,16 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
             return Response(None, status.HTTP_200_OK)
         return Response(None, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, *args, **kwargs):
-        """
+    # def put(self, request, *args, **kwargs):
+    #     """
 
-        """
-        return self.update(request, *args, **kwargs)
+    #     """
+    #     return self.update(request, *args, **kwargs)
 
         
     
     def patch(self, request, *args, **kwargs):
+        print(request.data)
         return self.partial_update(request, *args, **kwargs)
 
     def delete(self, request, *args, **kwargs):
@@ -166,8 +179,11 @@ class PostCategoryList(generics.ListAPIView):
         perm = IsOwner()
 
         if perm.has_permission(request=self.request, view= None ):
+            print("cate")
             return super(PostCategoryList, self).get_queryset()
         else:
+            print("cu")
+            return super(PostCategoryList, self).get_queryset()
             return PostCategory.objects.filter(is_private=False)
 
 
