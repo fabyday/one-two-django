@@ -107,7 +107,7 @@ class CreatePost(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         request.data._mutable = True
         request.data['author'] = str(request.user.id)
-        print(request.data)
+        print("req :", request.data)
         l = []
         for img in request.data.pop('images') :
             # l.append({"image":img})
@@ -115,7 +115,7 @@ class CreatePost(generics.CreateAPIView):
             qq['image']=img
             l.append(qq)
             # request.data['images'].append(qq)
-        print(l)
+        print("ttest", l)
         # request.data['images']=l
         request.data.setlist('images', l)
         serializer = PostCreateSerializer(data = request.data)
