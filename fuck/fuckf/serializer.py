@@ -114,10 +114,12 @@ class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PostImage
         fields = ["image"]
-    
+  
+
+
     def craete(self, validated_data):
         print("ffff", validated_data)
-        super(ImageSerializer, self).create(**validated_data)
+        return super(ImageSerializer, self).create(**validated_data)
 
 class PostSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=False, allow_blank=True, max_length=100)

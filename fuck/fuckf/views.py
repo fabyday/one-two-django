@@ -1,4 +1,5 @@
 from telnetlib import STATUS
+from tkinter import Image
 from django.contrib.auth.models import User, Group
 from rest_framework import permissions, response, status, viewsets
 from .serializer import PostSerializer
@@ -97,6 +98,23 @@ class PostList(generics.ListAPIView):
             return Post.objects.filter(category_id=kwargs['category'])
 
 from rest_framework.parsers import *
+class CreateImage(generics.CreateAPIView):
+    queryset = PostImage.objects.all()
+    serializer_class = ImageSerializer 
+    # permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.AllowAny,)
+    # authentication_classes = [TokenAuthentication, BasicAuthentication]
+    def post(self, request, *args, **kwargs):
+        
+        serializer = CreateImage.serializer_class(data=request.data, context={"request": request} )
+        if serializer.is_valid():
+            # post = serializer.create(request.data, request.user)
+            post = serializer.save()
+            # serializer.create()
+            # post = Post.objects.create(title = request.data['title'], category=PostCategory.objects.get(id=request.data['category']),  author = request.user, contents = request.data['contents'])
+            return Response(serializer.data, status = status.HTTP_200_OK)
+
+        return Response(status = status.HTTP_400_BAD_REQUEST)
 
 
 class CreatePost(generics.CreateAPIView):

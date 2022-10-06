@@ -23,7 +23,7 @@ urlpatterns = [
         # post delete get put update
         path('post/<int:pk>', views.PostDetail.as_view()),
         
-        
+        path("create-image", views.CreateImage.as_view()),  
         
         
         # path(, views.PostList.as_view()),
