@@ -34,6 +34,8 @@ first add user(you are admin user so, make your admin id)
 
 bash```
 >>> python manage.py createsuperuser
+>>> python manage.py runserver // run as http
+>>> python manage.py runsslserver // run as sslserver(https)
 ```
 then you can create admin id
 

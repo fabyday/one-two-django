@@ -42,7 +42,11 @@ INSTALLED_APPS = [
 
     'fuckf',
     'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+
+
+    #for https sslserver test.
+    'sslserver'
 ]
 
 MIDDLEWARE = [
