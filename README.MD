@@ -28,6 +28,12 @@ and let's get inside directory, type ```cd fuck```
 
 then you finally get to start developing.
 
+
+# make ssl cert
+```
+>>> openssl genrsa 2048 > django.key
+>>> openssl req -new -x509 -nodes -config openssl.cfg -sha256 -days 365 -key ./django.key > django.crt```
+
 # Usage
 
 first add user(you are admin user so, make your admin id)
